@@ -2,10 +2,10 @@
 nixPkgs = ["nodejs-18_x", "openssl"]
 
 [phases.install]
-cmds = ["npm ci"]
+cmds = ["npm ci --omit=dev --ignore-scripts"]
 
 [phases.build]
-cmds = ["npx prisma generate"]
+cmds = []
 
 [start]
-cmd = "npx prisma migrate deploy && npm start"
+cmd = "npx prisma generate && npx prisma migrate deploy && npm start"
