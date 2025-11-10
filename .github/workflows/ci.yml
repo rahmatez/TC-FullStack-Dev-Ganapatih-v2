@@ -26,6 +26,11 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/newsfeed_db_test?schema=public
+      JWT_SECRET: test-jwt-secret-key-for-ci
+      JWT_REFRESH_SECRET: test-jwt-refresh-secret-key-for-ci
+      JWT_EXPIRES_IN: 24h
+      JWT_REFRESH_EXPIRES_IN: 7d
+      NODE_ENV: test
     defaults:
       run:
         working-directory: backend
