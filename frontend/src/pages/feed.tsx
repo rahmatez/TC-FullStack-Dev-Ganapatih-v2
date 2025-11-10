@@ -26,21 +26,25 @@ function Feed() {
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [toast, setToast] = useState<ToastData | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchFeed = async (pageNum = 1) => {
     try {
+      setError(null);
       const response = await feedAPI.getFeed(pageNum, 10);
       const { posts: newPosts, totalPages } = response.data;
       
       if (pageNum === 1) {
-        setPosts(newPosts);
+        setPosts(newPosts || []);
       } else {
-        setPosts((prev) => [...prev, ...newPosts]);
+        setPosts((prev) => [...prev, ...(newPosts || [])]);
       }
       
       setHasMore(pageNum < totalPages);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch feed:', error);
+      setError(error.response?.data?.message || 'Failed to load feed. Please try again.');
+      setPosts([]);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -149,8 +153,29 @@ function Feed() {
             {/* Create Post */}
             <CreatePost onPostCreated={handlePostCreated} />
             
+            {/* Error State */}
+            {error && (
+              <div className="card p-6 border-l-4 border-red-500 bg-red-50">
+                <div className="flex items-start">
+                  <svg className="w-5 h-5 text-red-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-medium text-red-800 mb-1">Error loading feed</h3>
+                    <p className="text-sm text-red-700">{error}</p>
+                    <button
+                      onClick={() => fetchFeed(1)}
+                      className="mt-3 text-sm font-medium text-red-600 hover:text-red-500"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {/* Posts Section */}
-            {posts.length === 0 ? (
+            {!error && posts.length === 0 ? (
               <div className="card p-12 text-center">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
