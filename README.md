@@ -111,7 +111,6 @@ npm run dev
 > **Status:** Ready for deployment
 - **Frontend:** [https://tc-full-stack-dev-ganapatih-v2.vercel.app/](https://tc-full-stack-dev-ganapatih-v2.vercel.app/)
 - **Backend API:** [https://tc-fullstack-dev-ganapatih-v2-production.up.railway.app/api](https://tc-fullstack-dev-ganapatih-v2-production.up.railway.app/api)
-> **Note:** Deployment URLs will be added after deployment to production
 
 **Test Accounts (after running seed):**
 - Username: `alice` / Password: `password123`
