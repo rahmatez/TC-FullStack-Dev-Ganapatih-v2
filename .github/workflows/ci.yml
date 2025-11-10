@@ -48,7 +48,7 @@ jobs:
         run: npx prisma migrate deploy
 
       - name: Run tests
-        run: npm test -- --runInBand
+        run: npm test -- --runInBand --forceExit
 
   frontend:
     name: Frontend Tests
