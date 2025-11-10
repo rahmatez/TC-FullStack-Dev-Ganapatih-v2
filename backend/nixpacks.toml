@@ -1,11 +1,11 @@
 [phases.setup]
-nixPkgs = ["nodejs-18_x", "openssl"]
+nixPkgs = ["nodejs_18", "openssl"]
 
 [phases.install]
-cmds = ["npm ci --omit=dev --ignore-scripts"]
+cmds = ["npm ci"]
 
 [phases.build]
-cmds = []
+cmds = ["npx prisma generate"]
 
 [start]
-cmd = "npx prisma generate && echo 'Prisma Client Generated' && npx prisma migrate deploy && echo 'Migration Completed' && npm start"
+cmd = "npx prisma migrate deploy && npm start"
