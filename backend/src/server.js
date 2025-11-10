@@ -29,9 +29,13 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // CORS configuration
+const corsOrigins = process.env.FRONTEND_URL 
+  ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+  : ['http://localhost:3000'];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: corsOrigins,
     credentials: true,
   })
 );
@@ -53,12 +57,29 @@ app.get('/', (req, res) => {
 });
 
 // Health check
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'News Feed API is running',
-    timestamp: new Date().toISOString() 
-  });
+app.get('/health', async (req, res) => {
+  try {
+    // Test database connection
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+    await prisma.$queryRaw`SELECT 1`;
+    await prisma.$disconnect();
+    
+    res.json({ 
+      status: 'OK', 
+      message: 'News Feed API is running',
+      database: 'connected',
+      timestamp: new Date().toISOString(),
+      env: process.env.NODE_ENV || 'development'
+    });
+  } catch (error) {
+    res.status(503).json({ 
+      status: 'ERROR', 
+      message: 'Database connection failed',
+      error: error.message,
+      timestamp: new Date().toISOString() 
+    });
+  }
 });
 
 // API Routes
@@ -77,10 +98,25 @@ app.use(errorHandler);
 // Start server
 if (process.env.NODE_ENV !== 'test') {
   const HOST = process.env.HOST || '0.0.0.0';
+  
+  // Test database connection before starting
+  import('@prisma/client').then(async ({ PrismaClient }) => {
+    const prisma = new PrismaClient();
+    try {
+      await prisma.$connect();
+      console.log('✅ Database connected successfully');
+      await prisma.$disconnect();
+    } catch (error) {
+      console.error('❌ Database connection failed:', error.message);
+      console.error('DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not set');
+    }
+  });
+  
   app.listen(PORT, HOST, () => {
     console.log(`🚀 Server is running on ${HOST}:${PORT}`);
     console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`🔗 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
+    console.log(`💾 Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`);
   });
 }
 
