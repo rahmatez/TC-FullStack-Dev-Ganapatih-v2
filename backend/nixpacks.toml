@@ -9,6 +9,3 @@ cmds = ["npx prisma generate"]
 
 [start]
 cmd = "npx prisma migrate deploy && node src/server.js"
-
-[variables]
-PORT = "8080"
